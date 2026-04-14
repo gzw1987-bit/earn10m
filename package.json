@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "sync": "bash scripts/sync-feishu.sh",
-    "sync:build": "bash scripts/sync-feishu.sh && next build"
+    "sync:build": "bash scripts/sync-feishu.sh && next build",
+    "deploy": "bash scripts/sync-feishu.sh && git add -A && git commit -m 'update data' && git push && vercel --prod",
+    "push": "git add -A && git commit -m 'update' && git push && vercel --prod"
   },
   "dependencies": {
     "next": "16.2.3",

@@ -23,46 +23,45 @@ export default function Home() {
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6">
       {/* Hero */}
-      <section className="py-20 sm:py-28">
-        <div className="animate-fade-in flex items-center gap-3 flex-wrap">
-          <span className="inline-flex items-center gap-2 rounded-full border border-[#818cf8]/30 bg-[#818cf8]/10 px-4 py-1.5 text-sm text-[#818cf8] font-semibold tracking-wide">
+      <section className="py-12 sm:py-28">
+        <div className="animate-fade-in flex items-center gap-2 sm:gap-3 flex-wrap">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#818cf8]/30 bg-[#818cf8]/10 px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm text-[#818cf8] font-semibold tracking-wide">
             OPC 一人公司
           </span>
-          <span className="inline-flex items-center gap-2 rounded-full border border-[#34d399]/30 bg-[#34d399]/10 px-4 py-1.5 text-sm text-[#34d399] font-semibold">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[#34d399]/30 bg-[#34d399]/10 px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-sm text-[#34d399] font-semibold">
             × AI
           </span>
-          <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-3 py-1.5 text-sm text-primary">
-            <span className="inline-block h-2 w-2 rounded-full bg-primary pulse-red" />
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/5 px-2.5 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm text-primary">
+            <span className="inline-block h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-primary pulse-red" />
             Day {daysSince}
           </span>
         </div>
 
-        <h1 className="mt-8 text-4xl font-bold leading-tight sm:text-6xl animate-fade-in">
+        <h1 className="mt-6 sm:mt-8 text-3xl sm:text-6xl font-bold leading-tight animate-fade-in">
           从<span className="text-negative">负债360万</span>
           <br />
           到<span className="text-accent">年赚千万</span>
         </h1>
 
-        <p className="mt-6 max-w-2xl text-lg text-text-secondary animate-fade-in-delay">
+        <p className="mt-4 sm:mt-6 max-w-2xl text-base sm:text-lg text-text-secondary animate-fade-in-delay">
           负债360万，不招一个员工。
           <strong className="text-[#818cf8]">一个人</strong> +
           <strong className="text-[#34d399]"> AI Agent</strong> =
           一家完整的公司。
-          <br />
+          <br className="hidden sm:block" />
           这是一个<strong className="text-text">OPC一人公司</strong>的全过程真实记录。
-          每一天做了什么、每一笔钱的流向、每一个决策 —— 全部公开。
         </p>
 
-        <div className="mt-10 flex gap-4 animate-fade-in-delay">
+        <div className="mt-8 sm:mt-10 flex gap-3 sm:gap-4 animate-fade-in-delay">
           <Link
             href="/log"
-            className="rounded-lg bg-[#818cf8] px-6 py-3 font-medium text-white transition-colors hover:bg-[#6366f1]"
+            className="rounded-lg bg-[#818cf8] px-5 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base font-medium text-white transition-colors hover:bg-[#6366f1]"
           >
             查看执行日志
           </Link>
           <Link
             href="/dashboard"
-            className="rounded-lg border border-[#1e1e2e] px-6 py-3 font-medium text-text-secondary transition-colors hover:bg-[#0d0d14] hover:text-text"
+            className="rounded-lg border border-[#1e1e2e] px-5 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base font-medium text-text-secondary transition-colors hover:bg-[#0d0d14] hover:text-text"
           >
             财务看板
           </Link>
@@ -70,36 +69,36 @@ export default function Home() {
       </section>
 
       {/* OPC 公式 */}
-      <section className="pb-16">
-        <div className="rounded-xl border border-[#1e1e2e] bg-[#0d0d14] p-8">
-          <div className="grid gap-6 sm:grid-cols-3 items-center text-center">
+      <section className="pb-10 sm:pb-16">
+        <div className="rounded-xl border border-[#1e1e2e] bg-[#0d0d14] p-5 sm:p-8">
+          <div className="flex items-center justify-around sm:grid sm:grid-cols-3 sm:gap-6 text-center">
             <div>
-              <div className="text-4xl mb-2">👤</div>
-              <div className="text-2xl font-bold text-[#818cf8]">1 个人</div>
-              <div className="text-sm text-text-muted mt-1">创始人 + 决策者</div>
+              <div className="text-3xl sm:text-4xl mb-1 sm:mb-2">👤</div>
+              <div className="text-lg sm:text-2xl font-bold text-[#818cf8]">1 个人</div>
+              <div className="text-xs sm:text-sm text-text-muted mt-1">决策者</div>
             </div>
             <div>
-              <div className="text-3xl text-text-muted mb-2">+</div>
-              <div className="text-4xl mb-2">🤖</div>
-              <div className="text-2xl font-bold text-[#34d399]">N 个 AI Agent</div>
-              <div className="text-sm text-text-muted mt-1">产品 · 运营 · 营销 · 客服</div>
+              <div className="text-xl sm:text-3xl text-text-muted">+</div>
+              <div className="text-3xl sm:text-4xl mb-1 sm:mb-2">🤖</div>
+              <div className="text-lg sm:text-2xl font-bold text-[#34d399]">AI Agent</div>
+              <div className="text-xs sm:text-sm text-text-muted mt-1">全栈团队</div>
             </div>
             <div>
-              <div className="text-3xl text-text-muted mb-2">=</div>
-              <div className="text-4xl mb-2">🎯</div>
-              <div className="text-2xl font-bold text-accent">年赚千万</div>
-              <div className="text-sm text-text-muted mt-1">一人公司的极限在哪？</div>
+              <div className="text-xl sm:text-3xl text-text-muted">=</div>
+              <div className="text-3xl sm:text-4xl mb-1 sm:mb-2">🎯</div>
+              <div className="text-lg sm:text-2xl font-bold text-accent">年赚千万</div>
+              <div className="text-xs sm:text-sm text-text-muted mt-1">极限在哪？</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* 实时数据 */}
-      <section className="pb-16">
+      <section className="pb-10 sm:pb-16">
         <h2 className="mb-6 text-sm font-medium uppercase tracking-wider text-text-muted">
           实时数据
         </h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           <FinanceCard
             label="当前净资产"
             value={formatMoney(netWorth)}
@@ -129,7 +128,7 @@ export default function Home() {
       </section>
 
       {/* 进度条 */}
-      <section className="pb-16">
+      <section className="pb-10 sm:pb-16">
         <div className="rounded-xl border border-[#1e1e2e] bg-[#0d0d14] p-6">
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm text-text-muted">OPC一人公司 → 年赚千万</span>
@@ -150,7 +149,7 @@ export default function Home() {
       </section>
 
       {/* 最新动态 */}
-      <section className="pb-16">
+      <section className="pb-10 sm:pb-16">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-sm font-medium uppercase tracking-wider text-text-muted">最新动态</h2>
           <Link href="/log" className="text-sm text-[#818cf8] hover:text-[#6366f1]">查看全部 →</Link>
