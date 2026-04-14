@@ -32,6 +32,16 @@
         "测试了 Telegram 自动记录功能，验证日志自动化流程。",
         "Telegram,自动化,测试",
         "Day 2: 测试 Telegram 自动记录功能"
+      ],
+      [
+        "2026-04-14 00:00:00",
+        "# Day 2: 通信测试\\n\\n## 今天做了什么\\n\\n1. **测试通信** — 验证消息通道是否正常连通\\n\\n## 当前状态\\n\\n- 负债：360万\\n- 业务线：待启动",
+        [
+          "平稳"
+        ],
+        "测试消息通道是否连通",
+        "测试,通信",
+        "Day 2: 通信测试"
       ]
     ],
     "field_id_list": [
@@ -58,7 +68,8 @@
     "record_id_list": [
       "recvgERjoY3hlM",
       "recvgLarUbXir2",
-      "recvgLgJ4L3C54"
+      "recvgLgJ4L3C54",
+      "recvgM7kydvdUF"
     ]
   },
   "_notice": {
