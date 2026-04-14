@@ -36,6 +36,14 @@ yarn-error.log*
 # vercel
 .vercel
 
+# local reports and covers source
+/daily-reports/
+/covers/*.html
+/covers/card-*.html
+/covers/share-*.html
+/covers/export*.py
+/covers/export*.sh
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

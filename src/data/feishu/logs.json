@@ -1,0 +1,42 @@
+{
+  "ok": true,
+  "identity": "user",
+  "data": {
+    "data": [
+      [
+        "2026-04-13 00:00:00",
+        "# Day 1: 从负债360万开始\n\n## 今天做了什么\n1. 确定项目方向 - 围绕AI的一切创业形式\n2. 搭建记录网站 - 用 Next.js + Tailwind 搭建了项目官网\n3. 规划内容矩阵 - 网站、公众号、视频号、小红书四个平台同步\n4. 搭建飞书数据中心 - 用多维表格管理所有数据\n\n## 当前状态\n- 负债：360万\n- 月收入：0\n- 业务线：0个盈利项目\n\n## 明天计划\n- 研究AI创业的具体赛道和机会\n- 发布第一条公众号文章\n- 开始短视频内容规划",
+        [
+          "不错"
+        ],
+        "正式启动年赚千万项目。搭建网站，确定AI创业方向，开始公开记录一切。",
+        "启动,网站搭建,AI创业",
+        "Day 1: 从负债360万开始"
+      ]
+    ],
+    "field_id_list": [
+      "fldyPrxPl6",
+      "fldEGSJEnk",
+      "fldISLGD9M",
+      "fldtVHpoFH",
+      "fldVGYVQrI",
+      "fldYnH7g71"
+    ],
+    "fields": [
+      "日期",
+      "正文",
+      "心情",
+      "摘要",
+      "标签",
+      "标题"
+    ],
+    "has_more": false,
+    "query_context": {
+      "field_scope": "all_fields",
+      "record_scope": "all_records"
+    },
+    "record_id_list": [
+      "recvgERjoY3hlM"
+    ]
+  }
+}

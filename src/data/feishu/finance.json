@@ -1,0 +1,37 @@
+{
+  "ok": true,
+  "identity": "user",
+  "data": {
+    "data": [
+      [
+        "2026-04",
+        -3600000,
+        0,
+        0,
+        -3600000
+      ]
+    ],
+    "field_id_list": [
+      "fldP9lVMgX",
+      "fld7mUCxJs",
+      "fld8ic7h94",
+      "fldv9cenSU",
+      "fldx4UWIbG"
+    ],
+    "fields": [
+      "月份",
+      "净资产",
+      "支出",
+      "收入",
+      "负债"
+    ],
+    "has_more": false,
+    "query_context": {
+      "field_scope": "all_fields",
+      "record_scope": "all_records"
+    },
+    "record_id_list": [
+      "recvgERlg5ST79"
+    ]
+  }
+}

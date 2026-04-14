@@ -1,0 +1,42 @@
+{
+  "ok": true,
+  "identity": "user",
+  "data": {
+    "data": [
+      [
+        "AI内容创业",
+        [
+          "建设中"
+        ],
+        0,
+        "内容,AI,自媒体",
+        "2026-04-13 00:00:00",
+        "围绕年赚千万真实记录的多平台内容矩阵：网站、公众号、视频号、小红书"
+      ]
+    ],
+    "field_id_list": [
+      "fldhIgXZ9C",
+      "fld9XIkIrq",
+      "fldHJnfeA8",
+      "fldlm8Kgxz",
+      "fldlPhKKp9",
+      "fldxkjuuqw"
+    ],
+    "fields": [
+      "名称",
+      "状态",
+      "累计收入",
+      "标签",
+      "启动日期",
+      "描述"
+    ],
+    "has_more": false,
+    "query_context": {
+      "field_scope": "all_fields",
+      "record_scope": "all_records"
+    },
+    "record_id_list": [
+      "recvgERnxsi7Ce"
+    ]
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "ok": true,
+  "identity": "user",
+  "data": {
+    "data": [],
+    "field_id_list": [
+      "fld5UfsRYF",
+      "fldASLZd8W",
+      "fldbvktHLv",
+      "fldC5CCl8R",
+      "fldtSJRCIG",
+      "fldXz6NCsE"
+    ],
+    "fields": [
+      "日期",
+      "标题",
+      "点赞数",
+      "阅读量",
+      "平台",
+      "链接"
+    ],
+    "has_more": false,
+    "query_context": {
+      "field_scope": "all_fields",
+      "record_scope": "all_records"
+    },
+    "record_id_list": []
+  }
+}
