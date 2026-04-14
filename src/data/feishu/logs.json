@@ -42,6 +42,14 @@
         "测试消息通道是否连通",
         "测试,通信",
         "Day 2: 通信测试"
+      ],
+      [
+        "2026-04-14 00:00:00",
+        "\n",
+        null,
+        null,
+        null,
+        null
       ]
     ],
     "field_id_list": [
@@ -69,7 +77,8 @@
       "recvgERjoY3hlM",
       "recvgLarUbXir2",
       "recvgLgJ4L3C54",
-      "recvgM7kydvdUF"
+      "recvgM7kydvdUF",
+      "recvgM7Oonhr2O"
     ]
   },
   "_notice": {
