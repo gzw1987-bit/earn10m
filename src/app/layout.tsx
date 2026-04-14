@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import NavUnified from "@/components/NavUnified";
 import "./globals.css";
 
@@ -44,6 +45,7 @@ export default function RootLayout({
             <p className="mt-1">0 员工 · N 个 AI Agent · Started 2026.04.13</p>
           </div>
         </footer>
+        <Analytics />
       </body>
     </html>
   );

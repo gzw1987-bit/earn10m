@@ -13,6 +13,7 @@
     "push": "git add -A && git commit -m 'update' && git push && vercel --prod"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "next": "16.2.3",
     "react": "19.2.4",
     "react-dom": "19.2.4"
