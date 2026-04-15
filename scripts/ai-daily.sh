@@ -2,6 +2,12 @@
 # AI日报 — 每天早上7点自动执行
 # 搜索全球AI新闻+赚钱情报 → 发送到飞书+Telegram
 
+# 加载 .env
+ENV_FILE="$(cd "$(dirname "$0")/.." && pwd)/.env"
+if [ -f "$ENV_FILE" ]; then
+    export $(grep -v '^#' "$ENV_FILE" | xargs)
+fi
+
 FEISHU_CHAT_ID="oc_86a0033ce2a2c0820a2137217aee9416"
 TELEGRAM_CHAT_ID="8296218023"
 TELEGRAM_BOT_TOKEN="${TELEGRAM_DAILY_BOT_TOKEN}"

@@ -16,6 +16,16 @@ SSL_CTX = ssl.create_default_context()
 SSL_CTX.check_hostname = False
 SSL_CTX.verify_mode = ssl.CERT_NONE
 
+# 从 .env 文件加载环境变量
+_env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")
+if os.path.exists(_env_path):
+    with open(_env_path) as _f:
+        for _line in _f:
+            _line = _line.strip()
+            if _line and not _line.startswith("#") and "=" in _line:
+                _k, _v = _line.split("=", 1)
+                os.environ[_k.strip()] = _v.strip()
+
 BOT_TOKEN = os.environ.get("TELEGRAM_LOG_BOT_TOKEN", "")
 ALLOWED_CHAT_ID = "8296218023"
 BASE_TOKEN = "OdCpbN0EKaEQBCsfeNgcUoLKnJd"

@@ -3,6 +3,12 @@
 # 监听 Telegram 消息 → AI整理 → 写入飞书 → 回复确认
 # 作为后台服务运行
 
+# 加载 .env
+ENV_FILE="$(cd "$(dirname "$0")/.." && pwd)/.env"
+if [ -f "$ENV_FILE" ]; then
+    export $(grep -v '^#' "$ENV_FILE" | xargs)
+fi
+
 BOT_TOKEN="${TELEGRAM_DAILY_BOT_TOKEN}"
 ALLOWED_CHAT_ID="8296218023"
 BASE_TOKEN="OdCpbN0EKaEQBCsfeNgcUoLKnJd"
@@ -43,9 +49,9 @@ except: pass
   while IFS= read -r line; do
     [ -z "$line" ] && continue
 
-    UPDATE_ID=$(echo "$line" | cut -d'|||' -f1)
-    CHAT_ID=$(echo "$line" | cut -d'|||' -f2)
-    TEXT=$(echo "$line" | cut -d'|||' -f3-)
+    UPDATE_ID=$(echo "$line" | awk -F'\\|\\|\\|' '{print $1}')
+    CHAT_ID=$(echo "$line" | awk -F'\\|\\|\\|' '{print $2}')
+    TEXT=$(echo "$line" | awk -F'\\|\\|\\|' '{print $3}')
     OFFSET=$((UPDATE_ID + 1))
 
     # 只处理允许的用户
