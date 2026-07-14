@@ -48,14 +48,31 @@ interface FeishuResponse {
   };
 }
 
-function readFeishuJson(filename: string): FeishuResponse | null {
-  try {
-    const filePath = path.join(process.cwd(), "src/data/feishu", filename);
-    const raw = fs.readFileSync(filePath, "utf-8");
-    return JSON.parse(raw);
-  } catch {
-    return null;
+function readFeishuJson(filename: string): FeishuResponse {
+  const filePath = path.join(process.cwd(), "src/data/feishu", filename);
+  const raw = fs.readFileSync(filePath, "utf-8");
+  const parsed: unknown = JSON.parse(raw);
+
+  if (!parsed || typeof parsed !== "object") {
+    throw new Error(`飞书数据顶层格式无效: ${filename}`);
   }
+  const response = parsed as Partial<FeishuResponse>;
+  const data = response.data;
+  if (
+    response.ok !== true ||
+    !data ||
+    !Array.isArray(data.fields) ||
+    !data.fields.every((field) => typeof field === "string") ||
+    !Array.isArray(data.data) ||
+    !Array.isArray(data.record_id_list) ||
+    data.data.length !== data.record_id_list.length ||
+    !data.data.every(
+      (row) => Array.isArray(row) && row.length === data.fields.length
+    )
+  ) {
+    throw new Error(`飞书数据契约无效: ${filename}`);
+  }
+  return response as FeishuResponse;
 }
 
 function parseRows(
@@ -71,40 +88,50 @@ function parseRows(
   });
 }
 
+function requiredText(value: unknown, field: string): string {
+  if (typeof value !== "string" || !value.trim()) {
+    throw new Error(`飞书字段必须是非空文本: ${field}`);
+  }
+  return value;
+}
+
+function finiteNumber(value: unknown, field: string): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new Error(`飞书字段必须是有限数字: ${field}`);
+  }
+  return value;
+}
+
 // ============ 数据读取 ============
 
 export function getFinancialData(): MonthlyFinance[] {
   const resp = readFeishuJson("finance.json");
-  if (!resp?.ok) {
-    return [{ month: "2026-04", debt: -3600000, income: 0, expense: 0, netWorth: -3600000 }];
-  }
   const rows = parseRows(resp);
-  return rows.map((r) => ({
-    month: String(r["月份"] ?? ""),
-    debt: Number(r["负债"] ?? 0),
-    income: Number(r["收入"] ?? 0),
-    expense: Number(r["支出"] ?? 0),
-    netWorth: Number(r["净资产"] ?? 0),
-  }));
+  return rows
+    .map((r) => ({
+      month: requiredText(r["月份"], "finance.月份"),
+      debt: finiteNumber(r["负债"], "finance.负债"),
+      income: finiteNumber(r["收入"], "finance.收入"),
+      expense: finiteNumber(r["支出"], "finance.支出"),
+      netWorth: finiteNumber(r["净资产"], "finance.净资产"),
+    }))
+    .sort((left, right) => left.month.localeCompare(right.month));
 }
 
 export function getBusinessLines(): BusinessLine[] {
   const resp = readFeishuJson("business.json");
-  if (!resp?.ok) {
-    return [];
-  }
   const rows = parseRows(resp);
   return rows.map((r) => {
     const statusArr = r["状态"];
     const status = Array.isArray(statusArr) ? statusArr[0] : String(statusArr ?? "规划中");
-    const tagsRaw = String(r["标签"] ?? "");
+    const tagsRaw = typeof r["标签"] === "string" ? r["标签"] : "";
     return {
       id: String(r._id),
-      name: String(r["名称"] ?? ""),
-      description: String(r["描述"] ?? ""),
+      name: requiredText(r["名称"], "business.名称"),
+      description: typeof r["描述"] === "string" ? r["描述"] : "",
       status,
-      startDate: String(r["启动日期"] ?? "").split(" ")[0],
-      revenue: Number(r["累计收入"] ?? 0),
+      startDate: requiredText(r["启动日期"], "business.启动日期").split(" ")[0],
+      revenue: finiteNumber(r["累计收入"], "business.累计收入"),
       tags: tagsRaw ? tagsRaw.split(",").map((t) => t.trim()) : [],
     };
   });
@@ -112,23 +139,20 @@ export function getBusinessLines(): BusinessLine[] {
 
 export function getLogEntries(): LogEntry[] {
   const resp = readFeishuJson("logs.json");
-  if (!resp?.ok) {
-    return [];
-  }
   const rows = parseRows(resp);
   return rows.map((r) => {
-    const date = String(r["日期"] ?? "").split(" ")[0];
+    const date = requiredText(r["日期"], "logs.日期").split(" ")[0];
     const moodArr = r["心情"];
     const mood = Array.isArray(moodArr) ? moodArr[0] : String(moodArr ?? "平稳");
-    const tagsRaw = String(r["标签"] ?? "");
+    const tagsRaw = typeof r["标签"] === "string" ? r["标签"] : "";
     return {
       slug: date,
       date,
-      title: String(r["标题"] ?? ""),
-      summary: String(r["摘要"] ?? ""),
+      title: requiredText(r["标题"], "logs.标题"),
+      summary: typeof r["摘要"] === "string" ? r["摘要"] : "",
       mood,
       tags: tagsRaw ? tagsRaw.split(",").map((t) => t.trim()) : [],
-      content: String(r["正文"] ?? ""),
+      content: requiredText(r["正文"], "logs.正文"),
     };
   });
 }

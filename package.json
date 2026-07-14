@@ -4,17 +4,23 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "validate:data": "python3 scripts/feishu_data_sync.py validate --source src/data/feishu",
+    "prebuild": "npm run validate:data",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "sync": "bash scripts/sync-feishu.sh",
-    "sync:build": "bash scripts/sync-feishu.sh && next build",
-    "deploy": "bash scripts/sync-feishu.sh && git add -A && git commit -m 'update data' && git push && vercel --prod",
-    "push": "git add -A && git commit -m 'update' && git push && vercel --prod"
+    "test": "python3 -m unittest discover -s tests -p 'test_*.py'",
+    "test:sync": "python3 -m unittest discover -s tests -p 'test_feishu_data_sync.py'",
+    "sync": "bash scripts/auto-deploy.sh",
+    "sync:build": "bash scripts/sync-feishu.sh --build",
+    "sync:restore": "bash scripts/sync-feishu.sh --restore",
+    "publish:data": "bash scripts/auto-deploy.sh --publish",
+    "deploy": "npm run publish:data",
+    "push": "npm run publish:data"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
-    "next": "16.2.3",
+    "next": "16.2.10",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
@@ -24,8 +30,11 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.2.3",
+    "eslint-config-next": "16.2.10",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "overrides": {
+    "postcss": "8.5.17"
   }
 }

@@ -12,6 +12,15 @@
 
 # testing
 /coverage
+__pycache__/
+*.py[cod]
+
+# atomic Feishu sync working sets and local recovery snapshot
+/src/data/.feishu-candidate.*/
+/src/data/.feishu-restore-candidate.*/
+/src/data/.feishu-snapshot-candidate.*/
+/src/data/.feishu-last-good/
+/src/data/.feishu-pre-restore/
 
 # next.js
 /.next/
@@ -32,6 +41,10 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# local bot state
+/var/
 
 # vercel
 .vercel

@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "identity": "bot",
+  "data": {
+    "data": [["2026-07-01 00:00:00", "正文", ["平稳"], "摘要", "测试,离线", "Day 1"]],
+    "field_id_list": ["fld_date", "fld_body", "fld_mood", "fld_summary", "fld_tags", "fld_title"],
+    "fields": ["日期", "正文", "心情", "摘要", "标签", "标题"],
+    "has_more": false,
+    "query_context": {"field_scope": "all_fields", "record_scope": "all_records"},
+    "record_id_list": ["rec_log_1"]
+  }
+}

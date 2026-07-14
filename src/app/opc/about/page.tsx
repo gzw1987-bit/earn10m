@@ -23,7 +23,7 @@ export default function OPCAboutPage() {
         </p>
 
         <p>
-          Sam Altman 和 Dario Amodei 都预测，2026-2028年会出现第一个"一人独角兽"。
+          Sam Altman 和 Dario Amodei 都预测，2026-2028年会出现第一个“一人独角兽”。
           北京、上海、深圳、杭州已经密集推出OPC扶持政策。
           这不是概念炒作，而是AI能力突破后的必然结果。
         </p>
@@ -90,7 +90,7 @@ export default function OPCAboutPage() {
 
         <p>
           不是我选择了OPC，是<strong className="text-text">OPC选择了我</strong>。
-          负债360万的人，没有资格搭团队。但AI让"一个人就是一支军队"成为可能。
+          负债360万的人，没有资格搭团队。但AI让“一个人就是一支军队”成为可能。
         </p>
 
         <h2 className="text-xl font-semibold text-text pt-4">起点</h2>

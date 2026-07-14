@@ -1,0 +1,5 @@
+`_record_id` is metadata for record operations, not a table field.
+
+| _record_id | 月份 | 收入 |
+| --- | --- | --- |
+| rec_fake | 2026-07 | 10 |
