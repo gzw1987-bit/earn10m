@@ -1,18 +1,17 @@
 # 新业务线：[名称]
 
-在 src/data/finance.ts 的 businessLines 数组中添加：
+在飞书「业务线」表中新增记录；页面读取同步后的 `src/data/feishu/business.json`，无需编辑 TypeScript 数组。
 
-```typescript
-{
-  id: "business-id",
-  name: "业务名称",
-  description: "一句话描述",
-  status: "planning",  // planning | building | launched | growing | paused
-  startDate: "YYYY-MM-DD",
-  revenue: 0,
-  tags: ["标签1", "标签2"],
-},
-```
+| 字段 | 示例与约束 |
+| --- | --- |
+| 名称 | 非空、唯一的业务名称 |
+| 描述 | 一句话描述 |
+| 状态 | 规划中 / 建设中 / 已上线 / 增长中 / 暂停 |
+| 启动日期 | 有效的 `YYYY-MM-DD` 日期 |
+| 累计收入 | 数值 `0`，随后按真实收入更新 |
+| 标签 | `标签1,标签2`，逗号分隔文本 |
+
+填写并复核后运行 `npm run sync`，审查数据 diff，再按 README 发布流程操作。
 
 ## 业务概述
 

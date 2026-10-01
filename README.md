@@ -4,10 +4,10 @@
 
 ## 本地开发
 
-要求：Node.js 20+、Python 3.11+。只有执行真实飞书同步时才需要已登录的 `lark-cli`。
+要求：Node.js 20.9+、Python 3.11+。只有执行真实飞书同步时才需要已登录的 `lark-cli`。
 
 ```bash
-npm install
+npm ci
 npm test
 npm run lint
 npm run build
@@ -88,7 +88,7 @@ npm run publish:data
 npm run test:sync
 ```
 
-当前 13 个测试覆盖：
+原有 13 个同步测试覆盖：
 
 - Markdown 冒充 JSON；
 - 空文件；
@@ -143,3 +143,15 @@ docs/LOOP.md                     持续核查、交付与复盘闭环
 当前机器上的小时 LaunchAgent 仍调用默认同步（不带 `--publish`）；暂停、恢复或修改它属于运行态操作，需要在受控窗口单独处理。Telegram Bot 必须在允许用户配置迁移后才能重启。
 
 发布脚本仅精确暂存 `src/data/feishu/`，不会执行 `git add -A`，也不会直接调用 Vercel 生产部署；后续部署由仓库 CI/Vercel Git 集成负责。
+
+## 2026-10-01 兼容升级与审查
+
+依赖升级到 Next.js / eslint-config-next 16.3.8、React / React DOM 19.3.0，PostCSS 固定到 8.5.28；保持 ESLint 9、TypeScript 5 与 Node.js 20 的现有主版本边界。完整锁文件一并更新，安装请使用 `npm ci`。
+
+数据安装和恢复在写入前拒绝相同、嵌套和符号链接目录，避免错误配置删除正式数据或覆盖恢复点。公开快照只接受四个普通 JSON 文件，并验证真实日历日期。日志按日期排序，ISO 日期统一取前十位；首页与财务页每小时按请求重新生成天数指标。
+
+Telegram 的模型输出在任何飞书写入前校验全部日志和业务字段。CLI 必须返回明确的 JSON 成功标识；异常输出不能触发同步。`CLAUDE_CLI_BIN`、`LARK_CLI_BIN` 与 `FEISHU_BASE_TOKEN` 可配置，错误日志会遮盖 Bot token。
+
+日报脚本使用项目相对路径、配置白名单、临时候选和实际长度分段；保留 UTF-8、正确编码 Telegram 文本并检查 API 成功标识。运行前配置 `.env.example` 中的日报 token 和目标聊天 ID；可选设置 `DAILY_REPORT_DIR`、`DAILY_DESKTOP_DIR`。日报 HTML 转义标题、正文和摘要中的不可信标签，保留加粗格式。
+
+`npm test` 当前有 27 项测试，包含数据目录防破坏、非法日期、模型响应拒绝、CLI 结果与 HTML 注入回归。测试采用本地 fixtures 和 fake CLI；真实消息发送、同步、发布和进程重启仍须按现有运行手册单独操作。超过 200 条数据仍会因未完整分页而拒绝同步；持久运行 manifest、跨更新写入幂等和内容隐私审核是后续工作。

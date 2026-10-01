@@ -11,6 +11,9 @@ import {
   statusToEn,
 } from "@/data/finance";
 
+// Refresh elapsed-day metrics without requiring a redeploy.
+export const revalidate = 3600;
+
 export default function Home() {
   const netWorth = getCurrentNetWorth();
   const daysSince = getDaysSinceStart();

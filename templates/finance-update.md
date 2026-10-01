@@ -1,16 +1,16 @@
 # YYYY-MM 月度财务更新
 
-在 src/data/finance.ts 的 financialData 数组中添加：
+在飞书「财务月报」表中新增月份记录；页面读取同步后的 `src/data/feishu/finance.json`，无需编辑 TypeScript 数组。
 
-```typescript
-{
-  month: "YYYY-MM",
-  debt: -XXXXXXX,     // 当月负债总额（负数）
-  income: XXXXX,       // 当月收入
-  expense: XXXXX,      // 当月支出
-  netWorth: -XXXXXXX,  // 净资产
-},
-```
+| 字段 | 格式与口径 |
+| --- | --- |
+| 月份 | `YYYY-MM`；每月唯一 |
+| 负债 | 有限数值，负债沿用负数口径 |
+| 收入 | 当月收入数值 |
+| 支出 | 当月支出数值 |
+| 净资产 | 当月净资产数值 |
+
+填写并复核后运行 `npm run sync`，审查数据 diff，再按 README 发布流程操作。
 
 ## 收入明细
 
