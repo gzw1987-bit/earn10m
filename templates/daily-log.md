@@ -32,5 +32,5 @@
 
 ---
 
-*心情：[great/good/neutral/tough/terrible]*
+*心情：[极佳/不错/平稳/有点难/很艰难]*
 *标签：#标签1 #标签2*

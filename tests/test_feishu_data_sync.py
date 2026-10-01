@@ -62,6 +62,85 @@ def add_incomplete_log(directory: Path) -> None:
 
 
 class FeishuDataSyncTests(unittest.TestCase):
+    def test_overlapping_install_paths_preserve_all_data(self) -> None:
+        for collision in ("source-live", "source-snapshot", "live-snapshot", "nested-snapshot", "alias"):
+            with self.subTest(collision=collision), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                candidate, live, snapshot = (root / name for name in ("candidate", "live", "snapshot"))
+                for directory in (candidate, live, snapshot):
+                    copy_valid(directory)
+                originals = {directory: tree_hash(directory) for directory in (candidate, live, snapshot)}
+                source_arg, live_arg, snapshot_arg = candidate, live, snapshot
+                if collision == "source-live":
+                    source_arg = live
+                elif collision == "source-snapshot":
+                    snapshot_arg = candidate
+                elif collision == "live-snapshot":
+                    snapshot_arg = live
+                elif collision == "nested-snapshot":
+                    snapshot_arg = live / "backup"
+                else:
+                    source_arg = root / "alias"
+                    source_arg.symlink_to(live, target_is_directory=True)
+                with self.assertRaises(ValidationError):
+                    install_exports(source_arg, live_arg, snapshot_arg)
+                for directory, before in originals.items():
+                    self.assertEqual(tree_hash(directory), before)
+                self.assertFalse((live / "backup").exists())
+
+    def test_overlapping_restore_paths_preserve_live_and_snapshots(self) -> None:
+        for collision in ("live-snapshot", "rescue-live", "rescue-snapshot", "nested-rescue"):
+            with self.subTest(collision=collision), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                live, snapshot = root / "live", root / "snapshot"
+                copy_valid(live)
+                copy_valid(snapshot)
+                set_finance_income(live, 987)
+                before = tree_hash(live)
+                snapshot_before = tree_hash(snapshot)
+                snapshot_arg = live if collision == "live-snapshot" else snapshot
+                rescue = {"rescue-live": live, "rescue-snapshot": snapshot, "nested-rescue": live / "rescue"}.get(collision)
+                with self.assertRaises(ValidationError):
+                    restore_last_good(live, snapshot_arg, rescue)
+                self.assertEqual(tree_hash(live), before)
+                self.assertEqual(tree_hash(snapshot), snapshot_before)
+
+    def test_export_rejects_symlinks_and_non_contract_entries(self) -> None:
+        for extra in ("symlink", "extra-file", "extra-directory", "fifo"):
+            with self.subTest(extra=extra), tempfile.TemporaryDirectory() as temporary:
+                candidate = Path(temporary) / "candidate"
+                copy_valid(candidate)
+                if extra == "symlink":
+                    (candidate / "finance.json").unlink()
+                    (candidate / "finance.json").symlink_to(VALID / "finance.json")
+                elif extra == "extra-file":
+                    (candidate / "private.txt").write_text("private data")
+                elif extra == "extra-directory":
+                    (candidate / "private").mkdir()
+                else:
+                    (candidate / "finance.json").unlink()
+                    os.mkfifo(candidate / "finance.json")
+                with self.assertRaises(ValidationError):
+                    validate_export_directory(candidate)
+
+    def test_impossible_dates_are_rejected_in_every_dated_table(self) -> None:
+        for filename, field in (("logs.json", "日期"), ("business.json", "启动日期"), ("content.json", "日期")):
+            for invalid_date in ("2026-02-30 00:00:00", "2026-13-01", "0000-01-01"):
+                with self.subTest(filename=filename, date=invalid_date), tempfile.TemporaryDirectory() as temporary:
+                    candidate = Path(temporary) / "candidate"
+                    copy_valid(candidate)
+                    path = candidate / filename
+                    payload = json.loads(path.read_text())
+                    if not payload["data"]["data"]:
+                        fields = payload["data"]["fields"]
+                        values = {"日期": invalid_date, "标题": "test", "平台": "test", "链接": "https://example.com", "点赞数": 0, "阅读量": 0}
+                        payload["data"]["data"] = [[values[name] for name in fields]]
+                        payload["data"]["record_id_list"] = ["rec-content"]
+                    payload["data"]["data"][0][payload["data"]["fields"].index(field)] = invalid_date
+                    path.write_text(json.dumps(payload, ensure_ascii=False))
+                    with self.assertRaises(ValidationError):
+                        validate_export_directory(candidate)
+
     def test_valid_fixture_passes_schema_and_business_invariants(self) -> None:
         summary = validate_export_directory(VALID)
         self.assertEqual(set(summary.file_hashes), set(REQUIRED_EXPORTS))

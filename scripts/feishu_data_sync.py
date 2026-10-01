@@ -21,6 +21,7 @@ import shutil
 import sys
 import tempfile
 from dataclasses import dataclass
+from datetime import date as calendar_date
 from typing import Any, Iterable
 
 
@@ -59,6 +60,8 @@ def _reject_nonstandard_number(value: str) -> None:
 
 
 def _load_json(path: pathlib.Path) -> Any:
+    if path.is_symlink() or not path.is_file():
+        _fail(path, "导出文件必须是普通文件，不能是链接或特殊文件")
     try:
         size = path.stat().st_size
     except FileNotFoundError as exc:
@@ -129,12 +132,21 @@ def _row_objects(path: pathlib.Path, payload: dict[str, Any]) -> list[dict[str, 
     return result
 
 
+def _require_date(path: pathlib.Path, field: str, value: object) -> str:
+    text = _require_text(path, field, value)
+    if not DATE_PREFIX.match(text):
+        _fail(path, f"日期格式无效: {text!r}")
+    try:
+        calendar_date.fromisoformat(text[:10])
+    except ValueError:
+        _fail(path, f"日期不存在: {text!r}")
+    return text
+
+
 def _validate_logs(path: pathlib.Path, rows: list[dict[str, Any]]) -> None:
     seen_dates: set[str] = set()
     for row in rows:
-        date = _require_text(path, "日期", row["日期"])
-        if not DATE_PREFIX.match(date):
-            _fail(path, f"日期格式无效: {date!r}")
+        date = _require_date(path, "日期", row["日期"])
         day = date[:10]
         if day in seen_dates:
             _fail(path, f"日期重复会造成日志 slug 冲突: {day}")
@@ -178,9 +190,7 @@ def _validate_business(path: pathlib.Path, rows: list[dict[str, Any]]) -> None:
         seen_names.add(name)
         if not _is_number(row["累计收入"]):
             _fail(path, "字段“累计收入”必须是有限数值")
-        start_date = _require_text(path, "启动日期", row["启动日期"])
-        if not DATE_PREFIX.match(start_date):
-            _fail(path, f"启动日期格式无效: {start_date!r}")
+        _require_date(path, "启动日期", row["启动日期"])
         status = row["状态"]
         if not (
             isinstance(status, str) and status.strip()
@@ -194,9 +204,7 @@ def _validate_business(path: pathlib.Path, rows: list[dict[str, Any]]) -> None:
 
 def _validate_content(path: pathlib.Path, rows: list[dict[str, Any]]) -> None:
     for row in rows:
-        date = _require_text(path, "日期", row["日期"])
-        if not DATE_PREFIX.match(date):
-            _fail(path, f"日期格式无效: {date!r}")
+        date = _require_date(path, "日期", row["日期"])
         _require_text(path, "标题", row["标题"])
         _require_text(path, "平台", row["平台"])
         _require_text(path, "链接", row["链接"])
@@ -280,7 +288,7 @@ def validate_export_directory(directory: os.PathLike[str] | str) -> ExportSummar
     if root.is_symlink() or not root.is_dir():
         raise ValidationError(f"导出路径不是普通目录: {root}")
 
-    present_json = {path.name for path in root.glob("*.json")}
+    present_json = {path.name for path in root.iterdir()}
     required = set(REQUIRED_EXPORTS)
     if present_json != required:
         raise ValidationError(
@@ -425,6 +433,17 @@ def _directory_is_valid(directory: pathlib.Path) -> bool:
         return False
 
 
+def _require_disjoint_paths(*paths: pathlib.Path) -> None:
+    """Reject aliases and nesting before any destructive directory operation."""
+    if any(path.is_symlink() for path in paths):
+        raise ValidationError("候选、正式数据与快照路径不能是符号链接")
+    resolved = [path.resolve() for path in paths]
+    for index, left in enumerate(resolved):
+        for right in resolved[index + 1:]:
+            if left == right or left in right.parents or right in left.parents:
+                raise ValidationError("候选、正式数据与快照路径必须互不重叠")
+
+
 def install_exports(
     source: os.PathLike[str] | str,
     live: os.PathLike[str] | str,
@@ -433,6 +452,7 @@ def install_exports(
     source_path = pathlib.Path(source).absolute()
     live_path = pathlib.Path(live).absolute()
     snapshot_path = pathlib.Path(last_good).absolute()
+    _require_disjoint_paths(source_path, live_path, snapshot_path)
     summary = validate_export_directory(source_path)
 
     live_path.parent.mkdir(parents=True, exist_ok=True)
@@ -501,9 +521,10 @@ def restore_last_good(
 ) -> ExportSummary:
     live_path = pathlib.Path(live).absolute()
     snapshot_path = pathlib.Path(last_good).absolute()
+    rescue_path = pathlib.Path(rescue).absolute() if rescue is not None else None
+    _require_disjoint_paths(live_path, snapshot_path, *([rescue_path] if rescue_path is not None else []))
     summary = validate_export_directory(snapshot_path)
     candidate = _copy_export_set(snapshot_path, live_path.parent, ".feishu-restore-candidate.")
-    rescue_path = pathlib.Path(rescue).absolute() if rescue is not None else None
     live_was_valid = live_path.exists() and _directory_is_valid(live_path)
     exchanged = False
     try:

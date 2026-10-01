@@ -1,10 +1,10 @@
 """将 AI 日报 Markdown 转成适合社交媒体分享的 HTML 长图"""
 import sys
 import re
-import os
+from html import escape
 
 def md_to_share_html(md_path, html_path):
-    with open(md_path, 'r') as f:
+    with open(md_path, 'r', encoding='utf-8') as f:
         content = f.read()
 
     # 提取日期
@@ -57,6 +57,8 @@ def md_to_share_html(md_path, html_path):
         icon = section_icons.get(title, '📌')
         color = section_colors.get(title, '#818cf8')
 
+        title = escape(title)
+
         # 处理正文：加粗、编号等
         body_html = ''
         paragraphs = body.strip().split('\n\n')
@@ -65,7 +67,7 @@ def md_to_share_html(md_path, html_path):
             if not para.strip():
                 continue
             lines = para.strip().split('\n')
-            para_text = ' '.join(lines)
+            para_text = escape(' '.join(lines))
 
             # 处理编号列表
             if re.match(r'^\d+\.', para_text):
@@ -83,7 +85,7 @@ def md_to_share_html(md_path, html_path):
 
         if title == '一句话总结':
             # 特殊样式
-            body_clean = re.sub(r'\*\*(.+?)\*\*', r'\1', body.strip())
+            body_clean = re.sub(r'\*\*(.+?)\*\*', r'\1', escape(body.strip()))
             section_html += f'''
             <div style="margin-top:32px; background:rgba(52,211,153,.06); border:1px solid rgba(52,211,153,.15); border-radius:16px; padding:32px;">
                 <div style="font-size:16px; color:{color}; font-weight:700; margin-bottom:12px;">{icon} {title}</div>
@@ -140,7 +142,7 @@ def md_to_share_html(md_path, html_path):
 </body>
 </html>'''
 
-    with open(html_path, 'w') as f:
+    with open(html_path, 'w', encoding='utf-8') as f:
         f.write(html)
     print(f'HTML generated: {html_path}')
 

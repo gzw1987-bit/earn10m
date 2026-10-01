@@ -102,6 +102,17 @@ function finiteNumber(value: unknown, field: string): number {
   return value;
 }
 
+function optionText(value: unknown, fallback: string): string {
+  const selected = Array.isArray(value) ? value[0] : value;
+  return typeof selected === "string" && selected.trim() ? selected : fallback;
+}
+
+function parseTags(value: unknown): string[] {
+  return typeof value === "string"
+    ? [...new Set(value.split(",").map((tag) => tag.trim()).filter(Boolean))]
+    : [];
+}
+
 // ============ 数据读取 ============
 
 export function getFinancialData(): MonthlyFinance[] {
@@ -123,16 +134,15 @@ export function getBusinessLines(): BusinessLine[] {
   const rows = parseRows(resp);
   return rows.map((r) => {
     const statusArr = r["状态"];
-    const status = Array.isArray(statusArr) ? statusArr[0] : String(statusArr ?? "规划中");
-    const tagsRaw = typeof r["标签"] === "string" ? r["标签"] : "";
+    const status = optionText(statusArr, "规划中");
     return {
       id: String(r._id),
       name: requiredText(r["名称"], "business.名称"),
       description: typeof r["描述"] === "string" ? r["描述"] : "",
       status,
-      startDate: requiredText(r["启动日期"], "business.启动日期").split(" ")[0],
+      startDate: requiredText(r["启动日期"], "business.启动日期").slice(0, 10),
       revenue: finiteNumber(r["累计收入"], "business.累计收入"),
-      tags: tagsRaw ? tagsRaw.split(",").map((t) => t.trim()) : [],
+      tags: parseTags(r["标签"]),
     };
   });
 }
@@ -141,20 +151,19 @@ export function getLogEntries(): LogEntry[] {
   const resp = readFeishuJson("logs.json");
   const rows = parseRows(resp);
   return rows.map((r) => {
-    const date = requiredText(r["日期"], "logs.日期").split(" ")[0];
+    const date = requiredText(r["日期"], "logs.日期").slice(0, 10);
     const moodArr = r["心情"];
-    const mood = Array.isArray(moodArr) ? moodArr[0] : String(moodArr ?? "平稳");
-    const tagsRaw = typeof r["标签"] === "string" ? r["标签"] : "";
+    const mood = optionText(moodArr, "平稳");
     return {
       slug: date,
       date,
       title: requiredText(r["标题"], "logs.标题"),
       summary: typeof r["摘要"] === "string" ? r["摘要"] : "",
       mood,
-      tags: tagsRaw ? tagsRaw.split(",").map((t) => t.trim()) : [],
+      tags: parseTags(r["标签"]),
       content: requiredText(r["正文"], "logs.正文"),
     };
-  });
+  }).sort((left, right) => left.date.localeCompare(right.date));
 }
 
 // ============ 计算函数 ============

@@ -8,7 +8,7 @@ import urllib.request
 import urllib.parse
 import sys
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 STATE_DIR = os.path.join(PROJECT_ROOT, "var")
@@ -38,7 +38,9 @@ load_env_file(os.path.join(PROJECT_ROOT, ".env"))
 
 BOT_TOKEN = os.environ.get("TELEGRAM_LOG_BOT_TOKEN", "")
 ALLOWED_CHAT_ID = os.environ.get("TELEGRAM_ALLOWED_CHAT_ID", "")
-BASE_TOKEN = "OdCpbN0EKaEQBCsfeNgcUoLKnJd"
+BASE_TOKEN = os.environ.get("FEISHU_BASE_TOKEN", "OdCpbN0EKaEQBCsfeNgcUoLKnJd")
+CLAUDE_CLI_BIN = os.environ.get("CLAUDE_CLI_BIN", "claude")
+LARK_CLI_BIN = os.environ.get("LARK_CLI_BIN", "lark-cli")
 LOG_TABLE = "tblJS1rIjKsKjH3p"
 BIZ_TABLE = "tblaEFebNACEMR71"
 API_BASE = f"https://api.telegram.org/bot{BOT_TOKEN}"
@@ -48,6 +50,8 @@ AUTO_PUBLISH_ENABLED = os.environ.get("AUTO_PUBLISH_ENABLED", "").lower() in {
 }
 
 def log(msg):
+    if BOT_TOKEN:
+        msg = str(msg).replace(BOT_TOKEN, "<redacted>")
     print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}", flush=True)
 
 
@@ -99,9 +103,12 @@ def run_claude(prompt):
     """用 Claude CLI 处理文本"""
     try:
         result = subprocess.run(
-            ["/Users/gzw/.local/bin/claude", "-p", "--allowedTools", ""],
+            [CLAUDE_CLI_BIN, "-p", "--allowedTools", ""],
             input=prompt, capture_output=True, text=True, timeout=120
         )
+        if result.returncode != 0:
+            log(f"Claude执行失败，退出码: {result.returncode}")
+            return None
         return result.stdout.strip()
     except Exception as e:
         log(f"Claude错误: {e}")
@@ -119,10 +126,10 @@ def write_to_feishu_log(title, summary, content, mood, tags):
 
     try:
         result = subprocess.run(
-            ["lark-cli", "base", "+record-batch-create",
+            [LARK_CLI_BIN, "base", "+record-batch-create",
              "--base-token", BASE_TOKEN,
              "--table-id", LOG_TABLE,
-             "--json", json_payload],
+             "--json", json_payload, "--format", "json"],
             capture_output=True, text=True, timeout=30
         )
         return lark_command_succeeded(result)
@@ -134,16 +141,18 @@ def write_to_feishu_log(title, summary, content, mood, tags):
 def lark_command_succeeded(result):
     if result.returncode != 0:
         return False
-    output = result.stdout.strip()
-    if not output:
-        return True
     try:
-        payload = json.loads(output)
-    except json.JSONDecodeError:
-        return '"ok": true' in output or '"code": 0' in output
+        payload = json.loads(result.stdout)
+    except (json.JSONDecodeError, TypeError):
+        return False
     if not isinstance(payload, dict):
-        return True
-    return payload.get("ok", True) is not False and payload.get("code", 0) == 0
+        return False
+    # Explicit success is required; malformed output must not trigger publishing.
+    if "ok" in payload and payload["ok"] is not True:
+        return False
+    if "code" in payload and (type(payload["code"]) is not int or payload["code"] != 0):
+        return False
+    return payload.get("ok") is True or (type(payload.get("code")) is int and payload["code"] == 0)
 
 def write_to_feishu_biz(name, desc, status):
     """写入飞书业务线表"""
@@ -157,10 +166,10 @@ def write_to_feishu_biz(name, desc, status):
 
     try:
         result = subprocess.run(
-            ["lark-cli", "base", "+record-batch-create",
+            [LARK_CLI_BIN, "base", "+record-batch-create",
              "--base-token", BASE_TOKEN,
              "--table-id", BIZ_TABLE,
-             "--json", json_payload],
+             "--json", json_payload, "--format", "json"],
             capture_output=True, text=True, timeout=30
         )
         return lark_command_succeeded(result)
@@ -184,6 +193,41 @@ def trigger_deploy():
     except (OSError, subprocess.SubprocessError) as exc:
         log(f"网站同步错误: {exc}")
         return False
+
+def validate_generated_log(data):
+    """Validate model output completely before the first external write."""
+    if not isinstance(data, dict):
+        return None
+    for field in ("title", "content"):
+        if not isinstance(data.get(field), str) or not data[field].strip():
+            return None
+    for field in ("summary", "tags"):
+        if not isinstance(data.get(field, ""), str):
+            return None
+    mood = data.get("mood", "不错")
+    if mood not in ("极佳", "不错", "平稳", "有点难", "很艰难"):
+        return None
+    business = data.get("new_business", [])
+    if not isinstance(business, list):
+        return None
+    names = set()
+    for item in business:
+        if not isinstance(item, dict):
+            return None
+        name = item.get("name")
+        if not isinstance(name, str) or not name.strip() or name in names:
+            return None
+        names.add(name)
+        if not isinstance(item.get("desc"), str):
+            return None
+        if item.get("status", "建设中") not in ("规划中", "建设中", "已上线", "增长中", "暂停"):
+            return None
+    return {
+        "title": data["title"], "content": data["content"],
+        "summary": data.get("summary", ""), "tags": data.get("tags", ""),
+        "mood": mood, "new_business": business,
+    }
+
 
 def process_message(text):
     """用 Claude 把用户消息整理成结构化日志"""
@@ -210,18 +254,15 @@ def process_message(text):
     if not raw:
         return None
 
-    # 尝试解析 JSON
-    import re
+    # Accept strict JSON and the common fenced-JSON wrapper only.
+    if raw.startswith("```") and raw.endswith("```"):
+        lines = raw.splitlines()
+        if lines[0].strip() in ("```", "```json"):
+            raw = "\n".join(lines[1:-1])
     try:
-        return json.loads(raw)
-    except:
-        m = re.search(r'\{[\s\S]*\}', raw)
-        if m:
-            try:
-                return json.loads(m.group())
-            except:
-                pass
-    return None
+        return validate_generated_log(json.loads(raw))
+    except (json.JSONDecodeError, TypeError):
+        return None
 
 def main():
     validate_config()

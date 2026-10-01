@@ -10,6 +10,9 @@ import {
   START_DEBT,
 } from "@/data/finance";
 
+// Refresh elapsed-day metrics without requiring a redeploy.
+export const revalidate = 3600;
+
 export default function DashboardPage() {
   const financialData = getFinancialData();
   const netWorth = getCurrentNetWorth();
